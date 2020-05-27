@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class LoanServiceProviderImpl implements LoanServiceProvider {
@@ -50,41 +51,55 @@ public class LoanServiceProviderImpl implements LoanServiceProvider {
             Loan updated = byId.get();
             updated.setReturnDate(new Date());
             loanRepository.save(updated);
-            LoanDto loanDto = new LoanDto().fill(loan)
+           return new LoanDto().fill(loan)
                     .setReader(readerRepository.find(updated.getReaderId()).get())
                     .setBook(bookRepository.find(updated.getBookIsbn()).get());
-            return loanDto;
+
         }
         throw new IllegalArgumentException(String.format("L'emprunt n°%s n'existe pas", loan.getId()));
     }
 
     @Override
-    public List<Loan> findByBorrowingDate(Date date) {
+    public List<LoanDto> findByBorrowingDate(Date date) {
+
         List<Loan> books = loanRepository.findByBorrowDate(date);
-        return books;
+        return books.stream().map(e->{
+            return new LoanDto().fill(e).setReader(readerRepository.find(e.getReaderId()).get())
+                    .setBook(bookRepository.find(e.getBookIsbn()).get());
+        }).collect(Collectors.toList());
+
     }
 
     @Override
-    public List<Loan> getAllBorrowedBooks() {
-        return loanRepository.findByReturnDateNull();
+    public List<LoanDto> getAllBorrowedBooks() {
+
+        return loanRepository.findByReturnDateNull().stream().map(e->{
+            return new LoanDto().fill(e).setReader(readerRepository.find(e.getReaderId()).get())
+                    .setBook(bookRepository.find(e.getBookIsbn()).get());
+        }).collect(Collectors.toList());
     }
 
     @Override
-    public List<Loan> getHistoryByReader(Reader reader) {
+    public List<LoanDto> getHistoryByReader(Reader reader) {
         Optional<Reader> optionalReader = readerRepository.find(reader.getId());
-        if(optionalReader.isPresent()) return loanRepository.findByReaderId(reader.getId());
-        return Collections.emptyList();
+        if(optionalReader.isPresent()) return loanRepository.findByReaderId(reader.getId()).stream().map(e->{
+            return new LoanDto().fill(e).setReader(readerRepository.find(e.getReaderId()).get())
+                    .setBook(bookRepository.find(e.getBookIsbn()).get());
+        }).collect(Collectors.toList());
+      throw new IllegalArgumentException(String.format("L'utilisateur n°%s n'existe pas", reader.getId()));
     }
 
     @Override
-    public Optional<Loan> getById(Integer id) {
-        return loanRepository.findById(id);
+    public Optional<LoanDto> getById(Integer id) {
+        Optional<Loan> byId = loanRepository.findById(id);
+        return byId.map(e-> new LoanDto().fill(e).setReader(readerRepository.find(e.getReaderId()).get())
+                .setBook(bookRepository.find(e.getBookIsbn()).get()));
     }
 
     private String prepareExceptionMessage(Loan loan, boolean reader, boolean book) {
         StringBuilder stringBuilder = new StringBuilder("");
-        if(!reader) stringBuilder.append(String.format("L'utilisateur n°%s est inexistant", loan.getReaderId()));
-        if(!book) stringBuilder.append(String.format("Le livre n°%s est inexistant", loan.getReaderId()));
+        if(!reader) stringBuilder.append(String.format("L'utilisateur n°%s n'existe pas", loan.getReaderId()));
+        if(!book) stringBuilder.append(String.format("Le livre n°%s n'éxiste pas", loan.getReaderId()));
         return stringBuilder.toString();
     }
 }

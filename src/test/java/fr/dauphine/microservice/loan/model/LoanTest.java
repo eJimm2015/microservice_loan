@@ -39,16 +39,14 @@ public class LoanTest {
 
     @Test
     public void testReaderGetterAndSetter() {
-        Reader reader = new Reader();
-        loan.setReader(reader);
-        assertEquals(reader, loan.getReader());
+        loan.setReaderId(12345);
+        assertEquals(Integer.valueOf(12345), loan.getReaderId());
     }
 
     @Test
     public void testBookGetterAndSetter() {
-        Book book = new Book();
-        loan.setBook(book);
-        assertEquals(book, loan.getBook());
+        loan.setBookIsbn("I1245DZ54");
+        assertEquals("I1245DZ54", loan.getBookIsbn());
     }
     @Test
     public void testEquals() {

@@ -1,4 +1,5 @@
 package fr.dauphine.microservice.loan.service.impl;
+import fr.dauphine.microservice.loan.dto.LoanDto;
 import fr.dauphine.microservice.loan.model.Book;
 import fr.dauphine.microservice.loan.model.Loan;
 import fr.dauphine.microservice.loan.model.Reader;
@@ -27,25 +28,40 @@ public class LoanServiceProviderImpl implements LoanServiceProvider {
     private BookRepository bookRepository;
 
     @Override
-    public Loan create(Loan loan) {
-        Optional<Reader> optionalReader = readerRepository.find(loan.getReader().getId());
-        Optional<Book> optionalBook = bookRepository.find(loan.getBook().getIsbn());
-        if (optionalReader.isPresent() && optionalBook.isPresent()){
-            loan.setReader(optionalReader.get()).setBook(optionalBook.get());
-            return loanRepository.save(loan);
+    public LoanDto create(Loan loan) throws IllegalArgumentException {
+        Optional<Reader> optionalReader = readerRepository.find(loan.getReaderId());
+        Optional<Book> optionalBook = bookRepository.find(loan.getBookIsbn());
+        boolean readerPresence = optionalReader.isPresent();
+        boolean bookPresence = optionalBook.isPresent();
+        if (readerPresence && bookPresence) {
+            Loan saved = loanRepository.save(loan);
+            return new LoanDto()
+                    .fill(saved)
+                    .setBook(optionalBook.get())
+                    .setReader(optionalReader.get());
         }
-        return loan;
+        throw new IllegalArgumentException(prepareExceptionMessage(loan, readerPresence, bookPresence));
     }
 
     @Override
-    public Loan returnBook(Loan loan) {
-        loan.setReturnDate(new Date());
-        return loanRepository.save(loan);
+    public LoanDto returnBook(Loan loan) {
+        Optional<Loan> byId = loanRepository.findById(loan.getId());
+        if(byId.isPresent()) {
+            Loan updated = byId.get();
+            updated.setReturnDate(new Date());
+            loanRepository.save(updated);
+            LoanDto loanDto = new LoanDto().fill(loan)
+                    .setReader(readerRepository.find(updated.getReaderId()).get())
+                    .setBook(bookRepository.find(updated.getBookIsbn()).get());
+            return loanDto;
+        }
+        throw new IllegalArgumentException(String.format("L'emprunt n°%s n'existe pas", loan.getId()));
     }
 
     @Override
     public List<Loan> findByBorrowingDate(Date date) {
-        return loanRepository.findByBorrowDate(date);
+        List<Loan> books = loanRepository.findByBorrowDate(date);
+        return books;
     }
 
     @Override
@@ -56,12 +72,19 @@ public class LoanServiceProviderImpl implements LoanServiceProvider {
     @Override
     public List<Loan> getHistoryByReader(Reader reader) {
         Optional<Reader> optionalReader = readerRepository.find(reader.getId());
-        if(optionalReader.isPresent()) return loanRepository.findByReader(reader);
+        if(optionalReader.isPresent()) return loanRepository.findByReaderId(reader.getId());
         return Collections.emptyList();
     }
 
     @Override
     public Optional<Loan> getById(Integer id) {
         return loanRepository.findById(id);
+    }
+
+    private String prepareExceptionMessage(Loan loan, boolean reader, boolean book) {
+        StringBuilder stringBuilder = new StringBuilder("");
+        if(!reader) stringBuilder.append(String.format("L'utilisateur n°%s est inexistant", loan.getReaderId()));
+        if(!book) stringBuilder.append(String.format("Le livre n°%s est inexistant", loan.getReaderId()));
+        return stringBuilder.toString();
     }
 }

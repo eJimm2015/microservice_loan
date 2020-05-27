@@ -11,6 +11,6 @@ import java.util.List;
 @Repository
 public interface LoanRepository extends JpaRepository<Loan, Integer> {
     List<Loan> findByBorrowDate(final Date borrowDate);
-    List<Loan> findByReader(final Reader reader);
+    List<Loan> findByReaderId(final Integer readerId);
     List<Loan> findByReturnDateNull();
 }

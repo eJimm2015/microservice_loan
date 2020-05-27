@@ -14,7 +14,7 @@ import java.util.Optional;
 import static org.springframework.http.HttpMethod.GET;
 
 @Service
-@PropertySource("api.properties")
+@PropertySource("classpath:api.properties")
 public class ReaderRepositoryImpl implements ReaderRepository {
 
     @Value("${reader.api}")

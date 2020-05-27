@@ -1,5 +1,6 @@
 package fr.dauphine.microservice.loan.service;
 
+import fr.dauphine.microservice.loan.dto.LoanDto;
 import fr.dauphine.microservice.loan.model.Book;
 import fr.dauphine.microservice.loan.model.Loan;
 import fr.dauphine.microservice.loan.model.Reader;
@@ -17,6 +18,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,14 +52,25 @@ public class LoanServiceProviderTest {
     public void testGetById() {
         int id = 12345;
         Loan loan = new Loan().setId(id);
+        Book book= new Book().setIsbn("12345");
+        Reader reader= new Reader().setId(16);
+        Optional<LoanDto> loanDto= Optional.of(new LoanDto().fill(loan).setReader(reader).setBook(book));
         when(loanRepository.findById(id)).thenReturn(Optional.of(loan));
-        assertEquals(Optional.of(loan), loanServiceProvider.getById(id));
+        when(readerRepository.find(any())).thenReturn(Optional.of(reader));
+        when(bookRepository.find(any())).thenReturn(Optional.of(book));
+        assertEquals(loanDto, loanServiceProvider.getById(id));
     }
 
     @Test
     public void testReturnBook() {
-        Loan loan = new Loan();
+        Loan loan = new Loan().setId(15);
+        Book book= new Book().setIsbn("12345");
+        Reader reader= new Reader().setId(16);
+        Optional<LoanDto> loanDto= Optional.of(new LoanDto().fill(loan).setReader(reader).setBook(book));
         when(loanRepository.save(loan)).thenReturn(loan);
+        when(loanRepository.findById(any())).thenReturn(Optional.of(loan));
+        when(readerRepository.find(any())).thenReturn(Optional.of(reader));
+        when(bookRepository.find(any())).thenReturn(Optional.of(book));
         assertNull(loan.getReturnDate());
         assertNotNull(loanServiceProvider.returnBook(loan).getReturnDate());
     }
@@ -65,24 +78,38 @@ public class LoanServiceProviderTest {
     @Test
     public void testFindByBorrowDate() {
         Date date = new Date();
+        Book book= new Book().setIsbn("12345");
+        Reader reader= new Reader().setId(16);
         List<Loan> loans = List.of(new Loan().setId(1), new Loan().setId(2));
+        List<LoanDto> loanDtos=loans.stream().map(e->new LoanDto().fill(e).setReader(reader).setBook(book)).collect(Collectors.toList());
         when(loanRepository.findByBorrowDate(date)).thenReturn(loans);
-        assertEquals(loans, loanServiceProvider.findByBorrowingDate(date));
+        when(readerRepository.find(any())).thenReturn(Optional.of(reader));
+        when(bookRepository.find(any())).thenReturn(Optional.of(book));
+        assertEquals(loanDtos, loanServiceProvider.findByBorrowingDate(date));
     }
 
     @Test
     public void testGetAllBorrowedBooks() {
+        Book book= new Book().setIsbn("12345");
+        Reader reader= new Reader().setId(16);
         List<Loan> loans = List.of(new Loan().setId(1), new Loan().setId(2));
+        List<LoanDto> loanDtos=loans.stream().map(e->new LoanDto().fill(e).setReader(reader).setBook(book)).collect(Collectors.toList());
+        when(readerRepository.find(any())).thenReturn(Optional.of(reader));
+        when(bookRepository.find(any())).thenReturn(Optional.of(book));
         when(loanRepository.findByReturnDateNull()).thenReturn(loans);
-        assertEquals(loans, loanServiceProvider.getAllBorrowedBooks());
+
+        assertEquals(loanDtos, loanServiceProvider.getAllBorrowedBooks());
     }
 
     @Test
     public void testGetHistoryByReader() {
-        List<Loan> loans = List.of(new Loan().setId(1), new Loan().setId(2));
+        List<Loan> loans = List.of(new Loan().setId(1).setReaderId(12345).setBookIsbn("12345"), new Loan().setId(2).setReaderId(12345).setBookIsbn("12345"));
         Reader reader = new Reader().setId(12345);
+        Book book = new Book().setIsbn("12345");
+        List<LoanDto> loanDtos= loans.stream().map(e-> new LoanDto().fill(e).setReader(reader).setBook(book)).collect(Collectors.toList());
         when(loanRepository.findByReaderId(reader.getId())).thenReturn(loans);
         when(readerRepository.find(reader.getId())).thenReturn(Optional.of(reader));
-        assertEquals(loans, loanServiceProvider.getHistoryByReader(reader));
+        when(bookRepository.find(any())).thenReturn(Optional.of(book));
+        assertEquals(loanDtos, loanServiceProvider.getHistoryByReader(reader));
     }
 }

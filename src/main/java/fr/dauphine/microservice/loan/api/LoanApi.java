@@ -1,5 +1,6 @@
 package fr.dauphine.microservice.loan.api;
 
+import fr.dauphine.microservice.loan.dto.LoanDto;
 import fr.dauphine.microservice.loan.model.Loan;
 import fr.dauphine.microservice.loan.model.Reader;
 import fr.dauphine.microservice.loan.service.LoanServiceProvider;
@@ -36,30 +37,30 @@ public class LoanApi {
     private LoanServiceProvider loanServiceProvider;
 
     @PostMapping
-    public ResponseEntity<EntityModel<Loan>> create(@RequestBody Loan loan) {
-        Loan created = loanServiceProvider.create(loan);
+    public ResponseEntity<EntityModel<LoanDto>> create(@RequestBody Loan loan) {
+        LoanDto created = loanServiceProvider.create(loan);
         Link link = getLink(created.getId());
         return new ResponseEntity<>(EntityModel.of(created, link), CREATED);
     }
 
     @PutMapping
-    public ResponseEntity<EntityModel<Loan>> returnBook(@RequestBody Loan loan) {
-        Loan returned = loanServiceProvider.returnBook(loan);
+    public ResponseEntity<EntityModel<LoanDto>> returnBook(@RequestBody Loan loan) {
+        LoanDto returned = loanServiceProvider.returnBook(loan);
         return ResponseEntity.ok(EntityModel.of(returned, getLink(returned.getId())));
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<EntityModel<Loan>> getById(@PathVariable("id") Integer id) {
-        Optional<Loan> loanOptional = loanServiceProvider.getById(id);
-        Loan loan = loanOptional.orElse(new Loan());
+    public ResponseEntity<EntityModel<LoanDto>> getById(@PathVariable("id") Integer id) {
+        Optional<LoanDto> loanOptional = loanServiceProvider.getById(id);
+        LoanDto loan = loanOptional.orElse(new LoanDto());
         Link link = getLink(id);
         return new ResponseEntity<>(EntityModel.of(loan, link), CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<CollectionModel<Loan>> findBy(@RequestParam(value = "date", required = false) String date,
+    public ResponseEntity<CollectionModel<LoanDto>> findBy(@RequestParam(value = "date", required = false) String date,
                                                         @RequestParam(value = "reader", required = false) Integer id) {
-        List<Loan> loans = Collections.emptyList();
+        List<LoanDto> loans = Collections.emptyList();
         if(date != null) {
             try {
                 loans = loanServiceProvider
@@ -71,7 +72,7 @@ public class LoanApi {
         else if(id != null) loans = loanServiceProvider.getHistoryByReader(new Reader().setId(id));
         else loans = loanServiceProvider.getAllBorrowedBooks();
 
-        List<Loan> collect = loans.stream()
+        List<LoanDto> collect = loans.stream()
                 .map(e -> e.add(getLink(e.getId())))
                 .collect(Collectors.toList());
         Link link = linkTo(methodOn(LoanApi.class)

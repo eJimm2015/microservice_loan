@@ -82,10 +82,8 @@ public class LoanServiceProviderImpl implements LoanServiceProvider {
     @Override
     public List<LoanDto> getHistoryByReader(Reader reader) {
         Optional<Reader> optionalReader = readerRepository.find(reader.getId());
-        if(optionalReader.isPresent()) return loanRepository.findByReaderId(reader.getId()).stream().map(e->{
-            return new LoanDto().fill(e).setReader(readerRepository.find(e.getReaderId()).get())
-                    .setBook(bookRepository.find(e.getBookIsbn()).get());
-        }).collect(Collectors.toList());
+        if(optionalReader.isPresent()) return loanRepository.findByReaderId(reader.getId()).stream().map(e-> new LoanDto().fill(e).setReader(readerRepository.find(e.getReaderId()).get())
+                .setBook(bookRepository.find(e.getBookIsbn()).get())).collect(Collectors.toList());
       throw new IllegalArgumentException(String.format("L'utilisateur n°%s n'existe pas", reader.getId()));
     }
 

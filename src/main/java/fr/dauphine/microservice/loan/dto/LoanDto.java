@@ -3,12 +3,13 @@ package fr.dauphine.microservice.loan.dto;
 import fr.dauphine.microservice.loan.model.Book;
 import fr.dauphine.microservice.loan.model.Loan;
 import fr.dauphine.microservice.loan.model.Reader;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.OneToOne;
 import java.util.Date;
 import java.util.Objects;
 
-public class LoanDto {
+public class LoanDto extends RepresentationModel<LoanDto> {
 
     private Integer id;
 

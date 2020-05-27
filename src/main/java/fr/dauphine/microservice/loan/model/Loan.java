@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.Objects;
 
 @Entity
-public class Loan extends RepresentationModel<Loan> {
+public class Loan  {
     @Id
     private Integer id;
 

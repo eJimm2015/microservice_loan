@@ -4,7 +4,6 @@ import fr.dauphine.microservice.loan.dto.LoanDto;
 import fr.dauphine.microservice.loan.model.Book;
 import fr.dauphine.microservice.loan.model.Loan;
 import fr.dauphine.microservice.loan.model.Reader;
-import fr.dauphine.microservice.loan.repository.BookRepository;
 import fr.dauphine.microservice.loan.repository.LoanRepository;
 import fr.dauphine.microservice.loan.repository.impl.BookRepositoryImpl;
 import fr.dauphine.microservice.loan.repository.impl.ReaderRepositoryImpl;
@@ -54,7 +53,7 @@ public class LoanServiceProviderTest {
         Loan loan = new Loan().setId(id);
         Book book= new Book().setIsbn("12345");
         Reader reader= new Reader().setId(16);
-        Optional<LoanDto> loanDto= Optional.of(new LoanDto().fill(loan).setReader(reader).setBook(book));
+        LoanDto loanDto= new LoanDto().fill(loan).setReader(reader).setBook(book);
         when(loanRepository.findById(id)).thenReturn(Optional.of(loan));
         when(readerRepository.find(any())).thenReturn(Optional.of(reader));
         when(bookRepository.find(any())).thenReturn(Optional.of(book));

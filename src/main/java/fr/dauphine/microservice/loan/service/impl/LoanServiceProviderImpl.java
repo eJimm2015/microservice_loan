@@ -1,4 +1,5 @@
 package fr.dauphine.microservice.loan.service.impl;
+
 import fr.dauphine.microservice.loan.dto.LoanDto;
 import fr.dauphine.microservice.loan.model.Book;
 import fr.dauphine.microservice.loan.model.Loan;
@@ -10,7 +11,6 @@ import fr.dauphine.microservice.loan.service.LoanServiceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -51,9 +51,7 @@ public class LoanServiceProviderImpl implements LoanServiceProvider {
             Loan updated = byId.get();
             updated.setReturnDate(new Date());
             loanRepository.save(updated);
-           return new LoanDto().fill(loan)
-                    .setReader(readerRepository.find(updated.getReaderId()).get())
-                    .setBook(bookRepository.find(updated.getBookIsbn()).get());
+           return getDto(updated);
 
         }
         throw new IllegalArgumentException(String.format("L'emprunt n°%s n'existe pas", loan.getId()));
@@ -63,20 +61,17 @@ public class LoanServiceProviderImpl implements LoanServiceProvider {
     public List<LoanDto> findByBorrowingDate(Date date) {
 
         List<Loan> books = loanRepository.findByBorrowDate(date);
-        return books.stream().map(e->{
-            return new LoanDto().fill(e).setReader(readerRepository.find(e.getReaderId()).get())
-                    .setBook(bookRepository.find(e.getBookIsbn()).get());
-        }).collect(Collectors.toList());
+        return books.stream().map(e-> getDto(e)).collect(Collectors.toList());
 
     }
 
     @Override
     public List<LoanDto> getAllBorrowedBooks() {
 
-        return loanRepository.findByReturnDateNull().stream().map(e->{
-            return new LoanDto().fill(e).setReader(readerRepository.find(e.getReaderId()).get())
-                    .setBook(bookRepository.find(e.getBookIsbn()).get());
-        }).collect(Collectors.toList());
+        return loanRepository.findByReturnDateNull()
+                .stream()
+                .map(e-> getDto(e))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -88,16 +83,21 @@ public class LoanServiceProviderImpl implements LoanServiceProvider {
     }
 
     @Override
-    public Optional<LoanDto> getById(Integer id) {
+    public LoanDto getById(Integer id) {
         Optional<Loan> byId = loanRepository.findById(id);
-        return byId.map(e-> new LoanDto().fill(e).setReader(readerRepository.find(e.getReaderId()).get())
-                .setBook(bookRepository.find(e.getBookIsbn()).get()));
+        if(byId.isPresent()) return getDto(byId.get());
+        throw new IllegalArgumentException(String.format("L'emprunt n°%s n'existe pas", id));
     }
 
     private String prepareExceptionMessage(Loan loan, boolean reader, boolean book) {
         StringBuilder stringBuilder = new StringBuilder("");
-        if(!reader) stringBuilder.append(String.format("L'utilisateur n°%s n'existe pas", loan.getReaderId()));
-        if(!book) stringBuilder.append(String.format("Le livre n°%s n'éxiste pas", loan.getReaderId()));
+        if(!reader) stringBuilder.append(String.format("L'utilisateur n°%s n'existe pas. ", loan.getReaderId()));
+        if(!book) stringBuilder.append(String.format("Le livre n°%s n'existe pas", loan.getBookIsbn()));
         return stringBuilder.toString();
+    }
+
+    private LoanDto getDto(Loan fill) {
+        return new LoanDto().fill(fill).setReader(readerRepository.find(fill.getReaderId()).get())
+                .setBook(bookRepository.find(fill.getBookIsbn()).get());
     }
 }

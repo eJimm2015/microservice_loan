@@ -9,25 +9,19 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
 @RequestMapping("/loans")
@@ -38,23 +32,37 @@ public class LoanApi {
 
     @PostMapping
     public ResponseEntity<EntityModel<LoanDto>> create(@RequestBody Loan loan) {
-        LoanDto created = loanServiceProvider.create(loan);
-        Link link = getLink(created.getId());
-        return new ResponseEntity<>(EntityModel.of(created, link), CREATED);
+
+        try {
+            LoanDto created = loanServiceProvider.create(loan);
+            Link link = getLink(created.getId());
+            return new ResponseEntity<>(EntityModel.of(created, link), CREATED);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(NOT_FOUND, e.getMessage());
+        }
+
+
     }
 
     @PutMapping
     public ResponseEntity<EntityModel<LoanDto>> returnBook(@RequestBody Loan loan) {
-        LoanDto returned = loanServiceProvider.returnBook(loan);
-        return ResponseEntity.ok(EntityModel.of(returned, getLink(returned.getId())));
+        try {
+            LoanDto returned = loanServiceProvider.returnBook(loan);
+            return ResponseEntity.ok(EntityModel.of(returned, getLink(returned.getId())));
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(NOT_FOUND, e.getMessage());
+        }
     }
 
     @GetMapping("{id}")
     public ResponseEntity<EntityModel<LoanDto>> getById(@PathVariable("id") Integer id) {
-        Optional<LoanDto> loanOptional = loanServiceProvider.getById(id);
-        LoanDto loan = loanOptional.orElse(new LoanDto());
-        Link link = getLink(id);
-        return new ResponseEntity<>(EntityModel.of(loan, link), CREATED);
+       try {
+           LoanDto loan = loanServiceProvider.getById(id);
+           Link link = getLink(id);
+           return new ResponseEntity<>(EntityModel.of(loan, link), CREATED);
+       } catch (IllegalArgumentException e) {
+           throw new ResponseStatusException(NOT_FOUND, e.getMessage());
+       }
     }
 
     @GetMapping
@@ -69,7 +77,13 @@ public class LoanApi {
                 e.printStackTrace();
             }
         }
-        else if(id != null) loans = loanServiceProvider.getHistoryByReader(new Reader().setId(id));
+        else if(id != null) {
+            try {
+                loans = loanServiceProvider.getHistoryByReader(new Reader().setId(id));
+            } catch (IllegalArgumentException e) {
+                throw new ResponseStatusException(NOT_FOUND, e.getMessage());
+            }
+        }
         else loans = loanServiceProvider.getAllBorrowedBooks();
 
         List<LoanDto> collect = loans.stream()

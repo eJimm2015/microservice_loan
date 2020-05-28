@@ -65,13 +65,12 @@ public class LoanServiceProviderTest {
         Loan loan = new Loan().setId(15);
         Book book= new Book().setIsbn("12345");
         Reader reader= new Reader().setId(16);
-        Optional<LoanDto> loanDto= Optional.of(new LoanDto().fill(loan).setReader(reader).setBook(book));
         when(loanRepository.save(loan)).thenReturn(loan);
         when(loanRepository.findById(any())).thenReturn(Optional.of(loan));
         when(readerRepository.find(any())).thenReturn(Optional.of(reader));
         when(bookRepository.find(any())).thenReturn(Optional.of(book));
         assertNull(loan.getReturnDate());
-        assertNotNull(loanServiceProvider.returnBook(loan).getReturnDate());
+        assertNotNull(loanServiceProvider.returnBook(15).getReturnDate());
     }
 
     @Test

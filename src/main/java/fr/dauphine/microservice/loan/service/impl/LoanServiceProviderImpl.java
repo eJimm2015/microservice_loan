@@ -45,8 +45,8 @@ public class LoanServiceProviderImpl implements LoanServiceProvider {
     }
 
     @Override
-    public LoanDto returnBook(Loan loan) {
-        Optional<Loan> byId = loanRepository.findById(loan.getId());
+    public LoanDto returnBook(Integer id) {
+        Optional<Loan> byId = loanRepository.findById(id);
         if(byId.isPresent()) {
             Loan updated = byId.get();
             updated.setReturnDate(new Date());
@@ -54,7 +54,7 @@ public class LoanServiceProviderImpl implements LoanServiceProvider {
            return getDto(updated);
 
         }
-        throw new IllegalArgumentException(String.format("L'emprunt n°%s n'existe pas", loan.getId()));
+        throw new IllegalArgumentException(String.format("L'emprunt n°%s n'existe pas", id));
     }
 
     @Override

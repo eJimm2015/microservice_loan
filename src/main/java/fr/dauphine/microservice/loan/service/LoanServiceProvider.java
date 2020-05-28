@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface LoanServiceProvider {
     LoanDto create(final Loan loan) throws IllegalArgumentException;
-    LoanDto returnBook(final Loan loan);
+    LoanDto returnBook(final Integer id);
     List<LoanDto> findByBorrowingDate(final Date date);
     List<LoanDto> getAllBorrowedBooks();
     List<LoanDto> getHistoryByReader(final Reader reader);

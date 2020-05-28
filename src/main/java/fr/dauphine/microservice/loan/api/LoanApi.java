@@ -44,10 +44,10 @@ public class LoanApi {
 
     }
 
-    @PutMapping
-    public ResponseEntity<EntityModel<LoanDto>> returnBook(@RequestBody Loan loan) {
+    @PutMapping("{id}")
+    public ResponseEntity<EntityModel<LoanDto>> returnBook(@PathVariable("id") Integer id) {
         try {
-            LoanDto returned = loanServiceProvider.returnBook(loan);
+            LoanDto returned = loanServiceProvider.returnBook(id);
             return ResponseEntity.ok(EntityModel.of(returned, getLink(returned.getId())));
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(NOT_FOUND, e.getMessage());

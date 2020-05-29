@@ -47,6 +47,24 @@ public class LoanServiceProviderTest {
         assertEquals(Integer.valueOf(12345), loanServiceProvider.create(loan).getId());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testUnknownReader() {
+        int id = 12345;
+        Loan loan = new Loan().setId(123);
+        when(readerRepository.find(any())).thenReturn(Optional.empty());
+        when(bookRepository.find(any())).thenReturn(Optional.of(new Book().setIsbn("A123456")));
+        loanServiceProvider.create(loan);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUnknownBook() {
+        int id = 12345;
+        Loan loan = new Loan().setId(123);
+        when(readerRepository.find(any())).thenReturn(Optional.of(new Reader().setId(1)));
+        when(bookRepository.find(any())).thenReturn(Optional.empty());
+        loanServiceProvider.create(loan);
+    }
+
     @Test
     public void testGetById() {
         int id = 12345;
@@ -58,6 +76,13 @@ public class LoanServiceProviderTest {
         when(readerRepository.find(any())).thenReturn(Optional.of(reader));
         when(bookRepository.find(any())).thenReturn(Optional.of(book));
         assertEquals(loanDto, loanServiceProvider.getById(id));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetUnknownId() {
+        int id = 12345;
+        when(loanRepository.findById(id)).thenReturn(Optional.empty());
+        loanServiceProvider.getById(id);
     }
 
     @Test

@@ -72,7 +72,7 @@ public class LoanApi {
         if(date != null) {
             try {
                 loans = loanServiceProvider
-                        .findByBorrowingDate(new SimpleDateFormat("dd/mm/yyyy").parse(date));
+                        .findByBorrowingDate(new SimpleDateFormat("dd/MM/yyyy").parse(date));
             } catch (ParseException e) {
                 e.printStackTrace();
             }

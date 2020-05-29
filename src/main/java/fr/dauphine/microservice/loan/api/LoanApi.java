@@ -1,5 +1,6 @@
 package fr.dauphine.microservice.loan.api;
 
+import fr.dauphine.microservice.loan.dto.LoanDto;
 import fr.dauphine.microservice.loan.model.Loan;
 import fr.dauphine.microservice.loan.model.Reader;
 import fr.dauphine.microservice.loan.service.LoanServiceProvider;
@@ -8,25 +9,19 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
 @RequestMapping("/loans")
@@ -36,30 +31,44 @@ public class LoanApi {
     private LoanServiceProvider loanServiceProvider;
 
     @PostMapping
-    public ResponseEntity<EntityModel<Loan>> create(@RequestBody Loan loan) {
-        Loan created = loanServiceProvider.create(loan);
-        Link link = getLink(created.getId());
-        return new ResponseEntity<>(EntityModel.of(created, link), CREATED);
+    public ResponseEntity<EntityModel<LoanDto>> create(@RequestBody Loan loan) {
+
+        try {
+            LoanDto created = loanServiceProvider.create(loan);
+            Link link = getLink(created.getId());
+            return new ResponseEntity<>(EntityModel.of(created, link), CREATED);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(NOT_FOUND, e.getMessage());
+        }
+
+
     }
 
-    @PutMapping
-    public ResponseEntity<EntityModel<Loan>> returnBook(@RequestBody Loan loan) {
-        Loan returned = loanServiceProvider.returnBook(loan);
-        return ResponseEntity.ok(EntityModel.of(returned, getLink(returned.getId())));
+    @PutMapping("{id}")
+    public ResponseEntity<EntityModel<LoanDto>> returnBook(@PathVariable("id") Integer id) {
+        try {
+            LoanDto returned = loanServiceProvider.returnBook(id);
+            return ResponseEntity.ok(EntityModel.of(returned, getLink(returned.getId())));
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(NOT_FOUND, e.getMessage());
+        }
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<EntityModel<Loan>> getById(@PathVariable("id") Integer id) {
-        Optional<Loan> loanOptional = loanServiceProvider.getById(id);
-        Loan loan = loanOptional.orElse(new Loan());
-        Link link = getLink(id);
-        return new ResponseEntity<>(EntityModel.of(loan, link), CREATED);
+    public ResponseEntity<EntityModel<LoanDto>> getById(@PathVariable("id") Integer id) {
+       try {
+           LoanDto loan = loanServiceProvider.getById(id);
+           Link link = getLink(id);
+           return new ResponseEntity<>(EntityModel.of(loan, link), CREATED);
+       } catch (IllegalArgumentException e) {
+           throw new ResponseStatusException(NOT_FOUND, e.getMessage());
+       }
     }
 
     @GetMapping
-    public ResponseEntity<CollectionModel<Loan>> findBy(@RequestParam(value = "date", required = false) String date,
+    public ResponseEntity<CollectionModel<LoanDto>> findBy(@RequestParam(value = "date", required = false) String date,
                                                         @RequestParam(value = "reader", required = false) Integer id) {
-        List<Loan> loans = Collections.emptyList();
+        List<LoanDto> loans = Collections.emptyList();
         if(date != null) {
             try {
                 loans = loanServiceProvider
@@ -68,10 +77,16 @@ public class LoanApi {
                 e.printStackTrace();
             }
         }
-        else if(id != null) loans = loanServiceProvider.getHistoryByReader(new Reader().setId(id));
+        else if(id != null) {
+            try {
+                loans = loanServiceProvider.getHistoryByReader(new Reader().setId(id));
+            } catch (IllegalArgumentException e) {
+                throw new ResponseStatusException(NOT_FOUND, e.getMessage());
+            }
+        }
         else loans = loanServiceProvider.getAllBorrowedBooks();
 
-        List<Loan> collect = loans.stream()
+        List<LoanDto> collect = loans.stream()
                 .map(e -> e.add(getLink(e.getId())))
                 .collect(Collectors.toList());
         Link link = linkTo(methodOn(LoanApi.class)

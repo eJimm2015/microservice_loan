@@ -1,52 +1,50 @@
-package fr.dauphine.microservice.loan.model;
+package fr.dauphine.microservice.loan.dto;
 
+import fr.dauphine.microservice.loan.model.Book;
+import fr.dauphine.microservice.loan.model.Loan;
+import fr.dauphine.microservice.loan.model.Reader;
 import org.springframework.hateoas.RepresentationModel;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import java.util.Date;
 import java.util.Objects;
 
-@Entity
-public class Loan  {
-    @Id
+public class LoanDto extends RepresentationModel<LoanDto> {
+
     private Integer id;
 
     public Integer getId() {
         return id;
     }
 
-    public Loan setId(Integer id) {
+    public LoanDto setId(Integer id) {
         this.id = id;
         return this;
     }
 
-    @Column(nullable = false)
-    private String bookIsbn;
+    private Book book;
 
-    @Column(nullable = false)
-    private Integer readerId;
+    private Reader reader;
 
     private Date borrowDate;
 
     private Date returnDate;
 
-    public String getBookIsbn() {
-        return bookIsbn;
+    public Book getBook() {
+        return book;
     }
 
-    public Loan setBookIsbn(String bookIsbn) {
-        this.bookIsbn = bookIsbn;
+    public LoanDto setBook(Book book) {
+        this.book = book;
         return this;
     }
 
-    public Integer getReaderId() {
-        return readerId;
+    public Reader getReader() {
+        return reader;
     }
 
-    public Loan setReaderId(Integer readerId) {
-        this.readerId = readerId;
+    public LoanDto setReader(Reader reader) {
+        this.reader = reader;
         return this;
     }
 
@@ -54,7 +52,7 @@ public class Loan  {
         return borrowDate;
     }
 
-    public Loan setBorrowDate(Date borrowDate) {
+    public LoanDto setBorrowDate(Date borrowDate) {
         this.borrowDate = borrowDate;
         return this;
     }
@@ -71,12 +69,19 @@ public class Loan  {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Loan loan = (Loan) o;
+        LoanDto loan = (LoanDto) o;
         return id.equals(loan.id);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public LoanDto fill(Loan loan) {
+        id = loan.getId();
+        borrowDate = loan.getBorrowDate();
+        returnDate = loan.getReturnDate();
+        return this;
     }
 }

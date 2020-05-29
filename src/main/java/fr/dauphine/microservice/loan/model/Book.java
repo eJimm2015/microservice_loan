@@ -2,13 +2,10 @@ package fr.dauphine.microservice.loan.model;
 
 import org.springframework.hateoas.RepresentationModel;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import java.util.Objects;
 
-@Entity
 public class Book extends RepresentationModel<Book> {
-    @Id
+
     private String isbn;
 
     public String getIsbn() {

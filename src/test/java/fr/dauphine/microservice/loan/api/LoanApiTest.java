@@ -18,6 +18,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -47,7 +48,7 @@ public class LoanApiTest {
 
     @Test(expected = ResponseStatusException.class)
     public void testCreationWithUnknownIds() {
-        when(loanServiceProvider.create(any())).thenThrow(new IllegalArgumentException());
+        when(loanServiceProvider.create(any())).thenThrow(new NoSuchElementException());
         loanApi.create(new Loan().setId(1));
     }
 
@@ -65,7 +66,7 @@ public class LoanApiTest {
 
     @Test(expected = ResponseStatusException.class)
     public void testReturnBookWithUnknownId() {
-        when(loanServiceProvider.returnBook(1)).thenThrow(new IllegalArgumentException());
+        when(loanServiceProvider.returnBook(1)).thenThrow(new NoSuchElementException());
         loanApi.returnBook(1);
     }
 
@@ -82,7 +83,7 @@ public class LoanApiTest {
 
     @Test(expected = ResponseStatusException.class)
     public void testFindUnknownId() {
-        when(loanServiceProvider.getById(1)).thenThrow(new IllegalArgumentException());
+        when(loanServiceProvider.getById(1)).thenThrow(new NoSuchElementException());
         loanApi.getById(1);
     }
 
@@ -118,7 +119,7 @@ public class LoanApiTest {
 
     @Test(expected = ResponseStatusException.class)
     public void testFindByUnknownReaderId() {
-        when(loanServiceProvider.getHistoryByReader(any())).thenThrow(new IllegalArgumentException());
+        when(loanServiceProvider.getHistoryByReader(any())).thenThrow(new NoSuchElementException());
         loanApi.findBy(null, 1);
     }
 

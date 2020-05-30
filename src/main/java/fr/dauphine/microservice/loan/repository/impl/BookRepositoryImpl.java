@@ -8,6 +8,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.NoSuchElementException;
@@ -25,11 +26,18 @@ public class BookRepositoryImpl implements BookRepository {
 
     @Override
     public Book find(String isbn) {
-        RestTemplate restTemplate = new RestTemplate();
-        String uri = String.format("%s%s",bookApi,isbn);
-        ResponseEntity<Book> responseEntity = restTemplate.exchange(uri, GET, null, Book.class);
-        if(responseEntity.getStatusCode().equals(HttpStatus.NOT_FOUND)) throw new NoSuchElementException(String.format("L'ISBN n°%s n'existe pas ",isbn));
-        return responseEntity.getBody();
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            String uri = String.format("%s%s",bookApi,isbn);
+            ResponseEntity<Book> responseEntity = restTemplate.exchange(uri, GET, null, Book.class);
+            return responseEntity.getBody();
+        } catch (HttpClientErrorException e) {
+            if(e.getStatusCode().equals(HttpStatus.NOT_FOUND)) throw new NoSuchElementException(String.format("L'ISBN n°%s n'existe pas ",isbn));
+            else throw e;
+        }
+
+
+
     }
 
 }

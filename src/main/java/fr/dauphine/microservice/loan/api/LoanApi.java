@@ -38,7 +38,7 @@ public class LoanApi {
             LoanDto created = loanServiceProvider.create(loan);
             Link link = getLink(created.getId());
             return new ResponseEntity<>(EntityModel.of(created, link), CREATED);
-        } catch (IllegalArgumentException e) {
+        } catch (NoSuchElementException e) {
             throw new ResponseStatusException(NOT_FOUND, e.getMessage());
         }
 

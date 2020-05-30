@@ -31,8 +31,7 @@ public class ReaderRepositoryImpl implements ReaderRepository {
             ResponseEntity<Reader> responseEntity = restTemplate.exchange(uri, GET, null, Reader.class);
             return responseEntity.getBody();
         } catch (HttpClientErrorException e) {
-            if (e.getRawStatusCode() == HttpStatus.NOT_FOUND.value())
-                throw new NoSuchElementException(String.format("L'utilisateur n°%s n'existe pas ", id));
+            if (e.getStatusCode().equals(HttpStatus.NOT_FOUND)) throw new NoSuchElementException(String.format("L'utilisateur n°%s n'existe pas ", id));
             else throw e;
         }
 

@@ -48,7 +48,7 @@ public class LoanApiTest {
 
     @Test(expected = ResponseStatusException.class)
     public void testCreationWithUnknownIds() {
-        when(loanServiceProvider.create(any())).thenThrow(new IllegalArgumentException());
+        when(loanServiceProvider.create(any())).thenThrow(new NoSuchElementException());
         loanApi.create(new Loan().setId(1));
     }
 

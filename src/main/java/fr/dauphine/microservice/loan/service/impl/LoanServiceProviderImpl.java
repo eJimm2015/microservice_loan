@@ -31,17 +31,13 @@ public class LoanServiceProviderImpl implements LoanServiceProvider {
 
     @Override
     public LoanDto create(Loan loan) throws NoSuchElementException {
-        try {
-            Reader reader = readerRepository.find(loan.getReaderId());
-            Book book = bookRepository.find(loan.getBookIsbn());
-            Loan saved = loanRepository.save(loan);
-            return new LoanDto()
-                    .fill(saved)
-                    .setBook(book)
-                    .setReader(reader);
-        } catch (NoSuchElementException e){
-            throw e;
-        }
+        Reader reader = readerRepository.find(loan.getReaderId());
+        Book book = bookRepository.find(loan.getBookIsbn());
+        Loan saved = loanRepository.save(loan);
+        return new LoanDto()
+                .fill(saved)
+                .setBook(book)
+                .setReader(reader);
     }
 
     @Override

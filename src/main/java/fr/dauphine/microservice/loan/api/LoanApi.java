@@ -16,6 +16,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -49,7 +50,7 @@ public class LoanApi {
         try {
             LoanDto returned = loanServiceProvider.returnBook(id);
             return ResponseEntity.ok(EntityModel.of(returned, getLink(returned.getId())));
-        } catch (IllegalArgumentException e) {
+        } catch (NoSuchElementException e) {
             throw new ResponseStatusException(NOT_FOUND, e.getMessage());
         }
     }
@@ -60,7 +61,7 @@ public class LoanApi {
            LoanDto loan = loanServiceProvider.getById(id);
            Link link = getLink(id);
            return new ResponseEntity<>(EntityModel.of(loan, link), CREATED);
-       } catch (IllegalArgumentException e) {
+       } catch (NoSuchElementException e) {
            throw new ResponseStatusException(NOT_FOUND, e.getMessage());
        }
     }
@@ -80,7 +81,7 @@ public class LoanApi {
         else if(id != null) {
             try {
                 loans = loanServiceProvider.getHistoryByReader(new Reader().setId(id));
-            } catch (IllegalArgumentException e) {
+            } catch (NoSuchElementException e) {
                 throw new ResponseStatusException(NOT_FOUND, e.getMessage());
             }
         }

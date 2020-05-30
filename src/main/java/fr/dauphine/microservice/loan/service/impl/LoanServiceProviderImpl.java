@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -29,19 +30,18 @@ public class LoanServiceProviderImpl implements LoanServiceProvider {
     private BookRepository bookRepository;
 
     @Override
-    public LoanDto create(Loan loan) throws IllegalArgumentException {
-        Optional<Reader> optionalReader = readerRepository.find(loan.getReaderId());
-        Optional<Book> optionalBook = bookRepository.find(loan.getBookIsbn());
-        boolean readerPresence = optionalReader.isPresent();
-        boolean bookPresence = optionalBook.isPresent();
-        if (readerPresence && bookPresence) {
+    public LoanDto create(Loan loan) throws NoSuchElementException {
+        try {
+            Reader reader = readerRepository.find(loan.getReaderId());
+            Book book = bookRepository.find(loan.getBookIsbn());
             Loan saved = loanRepository.save(loan);
             return new LoanDto()
                     .fill(saved)
-                    .setBook(optionalBook.get())
-                    .setReader(optionalReader.get());
+                    .setBook(book)
+                    .setReader(reader);
+        } catch (NoSuchElementException e){
+            throw e;
         }
-        throw new IllegalArgumentException(prepareExceptionMessage(loan, readerPresence, bookPresence));
     }
 
     @Override
@@ -61,7 +61,7 @@ public class LoanServiceProviderImpl implements LoanServiceProvider {
     public List<LoanDto> findByBorrowingDate(Date date) {
 
         List<Loan> books = loanRepository.findByBorrowDate(date);
-        return books.stream().map(e-> getDto(e)).collect(Collectors.toList());
+        return books.stream().map(this::getDto).collect(Collectors.toList());
 
     }
 
@@ -70,34 +70,26 @@ public class LoanServiceProviderImpl implements LoanServiceProvider {
 
         return loanRepository.findByReturnDateNull()
                 .stream()
-                .map(e-> getDto(e))
+                .map(this::getDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<LoanDto> getHistoryByReader(Reader reader) {
-        Optional<Reader> optionalReader = readerRepository.find(reader.getId());
-        if(optionalReader.isPresent()) return loanRepository.findByReaderId(reader.getId()).stream().map(e-> new LoanDto().fill(e).setReader(readerRepository.find(e.getReaderId()).get())
-                .setBook(bookRepository.find(e.getBookIsbn()).get())).collect(Collectors.toList());
-      throw new IllegalArgumentException(String.format("L'utilisateur n°%s n'existe pas", reader.getId()));
+    public List<LoanDto> getHistoryByReader(Reader reader) throws NoSuchElementException {
+        Reader reader1 = readerRepository.find(reader.getId());
+        return loanRepository.findByReaderId(reader1.getId()).stream().map(e-> new LoanDto().fill(e).setReader(reader1)
+                .setBook(bookRepository.find(e.getBookIsbn()))).collect(Collectors.toList());
     }
 
     @Override
     public LoanDto getById(Integer id) {
         Optional<Loan> byId = loanRepository.findById(id);
         if(byId.isPresent()) return getDto(byId.get());
-        throw new IllegalArgumentException(String.format("L'emprunt n°%s n'existe pas", id));
-    }
-
-    private String prepareExceptionMessage(Loan loan, boolean reader, boolean book) {
-        StringBuilder stringBuilder = new StringBuilder("");
-        if(!reader) stringBuilder.append(String.format("L'utilisateur n°%s n'existe pas. ", loan.getReaderId()));
-        if(!book) stringBuilder.append(String.format("Le livre n°%s n'existe pas", loan.getBookIsbn()));
-        return stringBuilder.toString();
+        throw new NoSuchElementException(String.format("L'emprunt n°%s n'existe pas", id));
     }
 
     private LoanDto getDto(Loan fill) {
-        return new LoanDto().fill(fill).setReader(readerRepository.find(fill.getReaderId()).get())
-                .setBook(bookRepository.find(fill.getBookIsbn()).get());
+        return new LoanDto().fill(fill).setReader(readerRepository.find(fill.getReaderId()))
+                .setBook(bookRepository.find(fill.getBookIsbn()));
     }
 }

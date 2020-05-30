@@ -5,10 +5,12 @@ import fr.dauphine.microservice.loan.model.Reader;
 import fr.dauphine.microservice.loan.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -22,14 +24,12 @@ public class BookRepositoryImpl implements BookRepository {
     private String bookApi;
 
     @Override
-    public Optional<Book> find(String isbn) {
-        Book book = getBook(isbn);
-        return Objects.isNull(book.getIsbn()) ? Optional.empty() : Optional.of(book);
-    }
-    private Book getBook(String isbn){
+    public Book find(String isbn) {
         RestTemplate restTemplate = new RestTemplate();
         String uri = String.format("%s%s",bookApi,isbn);
         ResponseEntity<Book> responseEntity = restTemplate.exchange(uri, GET, null, Book.class);
+        if(responseEntity.getStatusCode().equals(HttpStatus.NOT_FOUND)) throw new NoSuchElementException(String.format("L'ISBN n°%s n'existe pas ",isbn));
         return responseEntity.getBody();
     }
+
 }

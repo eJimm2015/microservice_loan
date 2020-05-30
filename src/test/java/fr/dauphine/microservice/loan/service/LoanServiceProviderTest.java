@@ -16,6 +16,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -42,26 +43,25 @@ public class LoanServiceProviderTest {
     public void testBookCreation() {
         Loan loan = new Loan();
         when(loanRepository.save(loan)).thenReturn(loan.setId(12345));
-        when(readerRepository.find(any())).thenReturn(Optional.of(new Reader().setId(12)));
-        when(bookRepository.find(any())).thenReturn(Optional.of(new Book().setIsbn("AE45")));
+        when(readerRepository.find(any())).thenReturn(new Reader().setId(12));
+        when(bookRepository.find(any())).thenReturn(new Book().setIsbn("AE45"));
         assertEquals(Integer.valueOf(12345), loanServiceProvider.create(loan).getId());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NoSuchElementException.class)
     public void testUnknownReader() {
         int id = 12345;
         Loan loan = new Loan().setId(123);
-        when(readerRepository.find(any())).thenReturn(Optional.empty());
-        when(bookRepository.find(any())).thenReturn(Optional.of(new Book().setIsbn("A123456")));
+        when(readerRepository.find(any())).thenThrow(new NoSuchElementException());
         loanServiceProvider.create(loan);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NoSuchElementException.class)
     public void testUnknownBook() {
         int id = 12345;
         Loan loan = new Loan().setId(123);
-        when(readerRepository.find(any())).thenReturn(Optional.of(new Reader().setId(1)));
-        when(bookRepository.find(any())).thenReturn(Optional.empty());
+        when(readerRepository.find(any())).thenReturn(new Reader().setId(1));
+        when(bookRepository.find(any())).thenThrow(new NoSuchElementException());
         loanServiceProvider.create(loan);
     }
 
@@ -73,12 +73,12 @@ public class LoanServiceProviderTest {
         Reader reader= new Reader().setId(16);
         LoanDto loanDto= new LoanDto().fill(loan).setReader(reader).setBook(book);
         when(loanRepository.findById(id)).thenReturn(Optional.of(loan));
-        when(readerRepository.find(any())).thenReturn(Optional.of(reader));
-        when(bookRepository.find(any())).thenReturn(Optional.of(book));
+        when(readerRepository.find(any())).thenReturn(reader);
+        when(bookRepository.find(any())).thenReturn(book);
         assertEquals(loanDto, loanServiceProvider.getById(id));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NoSuchElementException.class)
     public void testGetUnknownId() {
         int id = 12345;
         when(loanRepository.findById(id)).thenReturn(Optional.empty());
@@ -92,8 +92,8 @@ public class LoanServiceProviderTest {
         Reader reader= new Reader().setId(16);
         when(loanRepository.save(loan)).thenReturn(loan);
         when(loanRepository.findById(any())).thenReturn(Optional.of(loan));
-        when(readerRepository.find(any())).thenReturn(Optional.of(reader));
-        when(bookRepository.find(any())).thenReturn(Optional.of(book));
+        when(readerRepository.find(any())).thenReturn(reader);
+        when(bookRepository.find(any())).thenReturn(book);
         assertNull(loan.getReturnDate());
         assertNotNull(loanServiceProvider.returnBook(15).getReturnDate());
     }
@@ -106,8 +106,8 @@ public class LoanServiceProviderTest {
         List<Loan> loans = List.of(new Loan().setId(1), new Loan().setId(2));
         List<LoanDto> loanDtos=loans.stream().map(e->new LoanDto().fill(e).setReader(reader).setBook(book)).collect(Collectors.toList());
         when(loanRepository.findByBorrowDate(date)).thenReturn(loans);
-        when(readerRepository.find(any())).thenReturn(Optional.of(reader));
-        when(bookRepository.find(any())).thenReturn(Optional.of(book));
+        when(readerRepository.find(any())).thenReturn(reader);
+        when(bookRepository.find(any())).thenReturn(book);
         assertEquals(loanDtos, loanServiceProvider.findByBorrowingDate(date));
     }
 
@@ -117,8 +117,8 @@ public class LoanServiceProviderTest {
         Reader reader= new Reader().setId(16);
         List<Loan> loans = List.of(new Loan().setId(1), new Loan().setId(2));
         List<LoanDto> loanDtos=loans.stream().map(e->new LoanDto().fill(e).setReader(reader).setBook(book)).collect(Collectors.toList());
-        when(readerRepository.find(any())).thenReturn(Optional.of(reader));
-        when(bookRepository.find(any())).thenReturn(Optional.of(book));
+        when(readerRepository.find(any())).thenReturn(reader);
+        when(bookRepository.find(any())).thenReturn(book);
         when(loanRepository.findByReturnDateNull()).thenReturn(loans);
 
         assertEquals(loanDtos, loanServiceProvider.getAllBorrowedBooks());
@@ -131,8 +131,8 @@ public class LoanServiceProviderTest {
         Book book = new Book().setIsbn("12345");
         List<LoanDto> loanDtos= loans.stream().map(e-> new LoanDto().fill(e).setReader(reader).setBook(book)).collect(Collectors.toList());
         when(loanRepository.findByReaderId(reader.getId())).thenReturn(loans);
-        when(readerRepository.find(reader.getId())).thenReturn(Optional.of(reader));
-        when(bookRepository.find(any())).thenReturn(Optional.of(book));
+        when(readerRepository.find(reader.getId())).thenReturn(reader);
+        when(bookRepository.find(any())).thenReturn(book);
         assertEquals(loanDtos, loanServiceProvider.getHistoryByReader(reader));
     }
 }

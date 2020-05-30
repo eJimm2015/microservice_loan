@@ -1,16 +1,13 @@
 package fr.dauphine.microservice.loan.model;
 
-import org.springframework.hateoas.RepresentationModel;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.Objects;
 
 @Entity
 public class Loan  {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     public Integer getId() {
@@ -78,5 +75,16 @@ public class Loan  {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Loan{" +
+                "id=" + id +
+                ", bookIsbn='" + bookIsbn + '\'' +
+                ", readerId=" + readerId +
+                ", borrowDate=" + borrowDate +
+                ", returnDate=" + returnDate +
+                '}';
     }
 }

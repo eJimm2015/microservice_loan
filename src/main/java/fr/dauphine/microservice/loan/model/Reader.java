@@ -83,4 +83,16 @@ public class Reader extends RepresentationModel<Reader> {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    @Override
+    public String toString() {
+        return "Reader{" +
+                "id=" + id +
+                ", gender=" + gender +
+                ", familyName='" + familyName + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", birthDate=" + birthDate +
+                ", address='" + address + '\'' +
+                '}';
+    }
 }

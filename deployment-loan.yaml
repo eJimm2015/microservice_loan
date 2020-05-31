@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: loan-service
+  name: loan-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loan-service
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: loan-service
+    spec:
+      containers:
+      - image: microservice-loan:latest
+        name: microservice-loan
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8000
+        resources: {}
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: loan-service
+  name: loan-service
+spec:
+  ports:
+  - name: 8083-8083
+    port: 8083
+    protocol: TCP
+    targetPort: 8083
+  selector:
+    app: loan-service
+  type: ClusterIP
+status:
+  loadBalancer: {}

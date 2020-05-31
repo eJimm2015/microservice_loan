@@ -1,7 +1,7 @@
 package fr.dauphine.microservice.loan.api;
 
 import fr.dauphine.microservice.loan.dto.LoanDto;
-import fr.dauphine.microservice.loan.model.Loan;
+import fr.dauphine.microservice.loan.model.ClientLoan;
 import fr.dauphine.microservice.loan.model.Reader;
 import fr.dauphine.microservice.loan.service.LoanServiceProvider;
 import io.swagger.annotations.Api;
@@ -23,8 +23,7 @@ import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequestMapping("/loans")
@@ -36,10 +35,10 @@ public class LoanApi {
 
     @PostMapping
     @ApiOperation("Create Loan")
-    public ResponseEntity<EntityModel<LoanDto>> create(@RequestBody Loan loan) {
+    public ResponseEntity<EntityModel<LoanDto>> create(@RequestBody ClientLoan clientLoan) {
 
         try {
-            LoanDto created = loanServiceProvider.create(loan);
+            LoanDto created = loanServiceProvider.create(clientLoan.toLoan());
             Link link = getLink(created.getId());
             return new ResponseEntity<>(EntityModel.of(created, link), CREATED);
         } catch (NoSuchElementException e) {
@@ -64,7 +63,7 @@ public class LoanApi {
        try {
            LoanDto loan = loanServiceProvider.getById(id);
            Link link = getLink(id);
-           return new ResponseEntity<>(EntityModel.of(loan, link), CREATED);
+           return new ResponseEntity<>(EntityModel.of(loan, link), OK);
        } catch (NoSuchElementException e) {
            throw new ResponseStatusException(NOT_FOUND, e.getMessage());
        }

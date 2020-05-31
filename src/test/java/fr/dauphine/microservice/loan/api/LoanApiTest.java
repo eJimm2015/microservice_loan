@@ -1,6 +1,7 @@
 package fr.dauphine.microservice.loan.api;
 
 import fr.dauphine.microservice.loan.dto.LoanDto;
+import fr.dauphine.microservice.loan.model.ClientLoan;
 import fr.dauphine.microservice.loan.model.Loan;
 import fr.dauphine.microservice.loan.model.Reader;
 import fr.dauphine.microservice.loan.service.impl.LoanServiceProviderImpl;
@@ -38,8 +39,8 @@ public class LoanApiTest {
     public void testCreation() {
         Loan loan = new Loan().setId(1);
         LoanDto loanDto = new LoanDto().fill(loan);
-        when(loanServiceProvider.create(loan)).thenReturn(loanDto);
-        ResponseEntity<EntityModel<LoanDto>> entityModelResponseEntity = loanApi.create(loan);
+        when(loanServiceProvider.create(any())).thenReturn(loanDto);
+        ResponseEntity<EntityModel<LoanDto>> entityModelResponseEntity = loanApi.create(new ClientLoan());
         EntityModel<LoanDto> body = entityModelResponseEntity.getBody();
         assertNotNull(body);
         assertNotNull(body.getLinks());
@@ -49,7 +50,7 @@ public class LoanApiTest {
     @Test(expected = ResponseStatusException.class)
     public void testCreationWithUnknownIds() {
         when(loanServiceProvider.create(any())).thenThrow(new NoSuchElementException());
-        loanApi.create(new Loan().setId(1));
+        loanApi.create(new ClientLoan());
     }
 
     @Test

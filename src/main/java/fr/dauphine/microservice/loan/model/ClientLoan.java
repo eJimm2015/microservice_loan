@@ -1,91 +1,83 @@
 package fr.dauphine.microservice.loan.model;
 
-import javax.persistence.*;
+import io.swagger.annotations.ApiModelProperty;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
-@Entity
-public class Loan  {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class ClientLoan {
 
-    public Integer getId() {
-        return id;
-    }
-
-    public Loan setId(Integer id) {
-        this.id = id;
-        return this;
-    }
-
-    @Column(nullable = false)
     private String bookIsbn;
-
-    @Column(nullable = false)
     private Integer readerId;
-
+    @ApiModelProperty(value = "YYYY-MM-DD", example = "YYYY-MM-DD")
     private LocalDate borrowDate;
-
+    @ApiModelProperty(value = "YYYY-MM-DD")
     private LocalDate returnDate;
 
     public String getBookIsbn() {
         return bookIsbn;
     }
 
-    public Loan setBookIsbn(String bookIsbn) {
+    public void setBookIsbn(String bookIsbn) {
         this.bookIsbn = bookIsbn;
-        return this;
     }
 
     public Integer getReaderId() {
         return readerId;
     }
 
-    public Loan setReaderId(Integer readerId) {
+    public void setReaderId(Integer readerId) {
         this.readerId = readerId;
-        return this;
     }
 
     public LocalDate getBorrowDate() {
         return borrowDate;
     }
 
-    public Loan setBorrowDate(LocalDate borrowDate) {
+    public void setBorrowDate(LocalDate borrowDate) {
         this.borrowDate = borrowDate;
-        return this;
     }
 
     public LocalDate getReturnDate() {
         return returnDate;
     }
 
-    public Loan setReturnDate(LocalDate returnDate) {
+    public void setReturnDate(LocalDate returnDate) {
         this.returnDate = returnDate;
-        return this;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Loan loan = (Loan) o;
-        return id.equals(loan.id);
+        ClientLoan that = (ClientLoan) o;
+        return bookIsbn.equals(that.bookIsbn) &&
+                readerId.equals(that.readerId) &&
+                borrowDate.equals(that.borrowDate) &&
+                returnDate.equals(that.returnDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(bookIsbn, readerId, borrowDate, returnDate);
     }
 
     @Override
     public String toString() {
-        return "Loan{" +
-                "id=" + id +
-                ", bookIsbn='" + bookIsbn + '\'' +
+        return "ClientLoan{" +
+                "bookIsbn='" + bookIsbn + '\'' +
                 ", readerId=" + readerId +
                 ", borrowDate=" + borrowDate +
                 ", returnDate=" + returnDate +
                 '}';
     }
+
+    public Loan toLoan() {
+        return new Loan()
+                .setBookIsbn(bookIsbn)
+                .setReaderId(readerId)
+                .setBorrowDate(borrowDate)
+                .setReturnDate(returnDate);
+    }
 }
+

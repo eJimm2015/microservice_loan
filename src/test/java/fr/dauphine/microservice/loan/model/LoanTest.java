@@ -3,7 +3,7 @@ package fr.dauphine.microservice.loan.model;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -25,14 +25,14 @@ public class LoanTest {
 
     @Test
     public void testBorrowDateGetterAndSetter() {
-        Date d = new Date();
+        LocalDate d = LocalDate.now();
         loan.setBorrowDate(d);
         assertEquals(d, loan.getBorrowDate());
     }
 
     @Test
     public void testReturnDateGetterAndSetter() {
-        Date d = new Date();
+        LocalDate d = LocalDate.now();
         loan.setReturnDate(d);
         assertEquals(d, loan.getReturnDate());
     }

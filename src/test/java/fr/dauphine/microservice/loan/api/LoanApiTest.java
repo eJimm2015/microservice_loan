@@ -14,8 +14,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -88,14 +88,14 @@ public class LoanApiTest {
     }
 
     @Test
-    public void testFindByDate() throws ParseException {
+    public void testFindByDate() {
         List<LoanDto> loanDtos = new ArrayList<>();
         loanDtos.add(new LoanDto().setId(1));
         loanDtos.add(new LoanDto().setId(2));
-        String date = "29/05/2020";
+        String date = "2020-05-29";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         when(loanServiceProvider
-                .findByBorrowingDate(new SimpleDateFormat("dd/MM/yyyy")
-                        .parse(date)))
+                .findByBorrowingDate(LocalDate.parse(date, formatter)))
         .thenReturn(loanDtos);
         ResponseEntity<CollectionModel<LoanDto>> byDate = loanApi.findBy(date, null);
         CollectionModel<LoanDto> body = byDate.getBody();

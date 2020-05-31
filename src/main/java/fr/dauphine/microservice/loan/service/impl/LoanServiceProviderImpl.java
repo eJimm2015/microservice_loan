@@ -11,7 +11,7 @@ import fr.dauphine.microservice.loan.service.LoanServiceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -45,7 +45,7 @@ public class LoanServiceProviderImpl implements LoanServiceProvider {
         Optional<Loan> byId = loanRepository.findById(id);
         if(byId.isPresent()) {
             Loan updated = byId.get();
-            updated.setReturnDate(new Date());
+            updated.setReturnDate(LocalDate.now());
             loanRepository.save(updated);
            return getDto(updated);
 
@@ -54,7 +54,7 @@ public class LoanServiceProviderImpl implements LoanServiceProvider {
     }
 
     @Override
-    public List<LoanDto> findByBorrowingDate(Date date) {
+    public List<LoanDto> findByBorrowingDate(LocalDate date) {
 
         List<Loan> books = loanRepository.findByBorrowDate(date);
         return books.stream().map(this::getDto).collect(Collectors.toList());

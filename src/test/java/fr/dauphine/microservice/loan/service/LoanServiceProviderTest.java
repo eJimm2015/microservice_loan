@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -100,7 +100,7 @@ public class LoanServiceProviderTest {
 
     @Test
     public void testFindByBorrowDate() {
-        Date date = new Date();
+        LocalDate date = LocalDate.now();
         Book book= new Book().setIsbn("12345");
         Reader reader= new Reader().setId(16);
         List<Loan> loans = List.of(new Loan().setId(1), new Loan().setId(2));

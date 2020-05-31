@@ -4,6 +4,9 @@ import fr.dauphine.microservice.loan.dto.LoanDto;
 import fr.dauphine.microservice.loan.model.Loan;
 import fr.dauphine.microservice.loan.model.Reader;
 import fr.dauphine.microservice.loan.service.LoanServiceProvider;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -12,9 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -26,12 +28,14 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
 @RequestMapping("/loans")
+@Api(value = "Loan API")
 public class LoanApi {
 
     @Autowired
     private LoanServiceProvider loanServiceProvider;
 
     @PostMapping
+    @ApiOperation("Create Loan")
     public ResponseEntity<EntityModel<LoanDto>> create(@RequestBody Loan loan) {
 
         try {
@@ -41,11 +45,10 @@ public class LoanApi {
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(NOT_FOUND, e.getMessage());
         }
-
-
     }
 
     @PutMapping("{id}")
+    @ApiOperation("Return Book")
     public ResponseEntity<EntityModel<LoanDto>> returnBook(@PathVariable("id") Integer id) {
         try {
             LoanDto returned = loanServiceProvider.returnBook(id);
@@ -56,6 +59,7 @@ public class LoanApi {
     }
 
     @GetMapping("{id}")
+    @ApiOperation("Get Loan by ID")
     public ResponseEntity<EntityModel<LoanDto>> getById(@PathVariable("id") Integer id) {
        try {
            LoanDto loan = loanServiceProvider.getById(id);
@@ -67,16 +71,13 @@ public class LoanApi {
     }
 
     @GetMapping
-    public ResponseEntity<CollectionModel<LoanDto>> findBy(@RequestParam(value = "date", required = false) String date,
+    @ApiOperation("Get Loans by attributes")
+    public ResponseEntity<CollectionModel<LoanDto>> findBy(@ApiParam(value = "YYYY-MM-DD") @RequestParam(value = "date", required = false) String date,
                                                         @RequestParam(value = "reader", required = false) Integer id) {
-        List<LoanDto> loans = Collections.emptyList();
+        List<LoanDto> loans;
         if(date != null) {
-            try {
-                loans = loanServiceProvider
-                        .findByBorrowingDate(new SimpleDateFormat("dd/MM/yyyy").parse(date));
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            loans = loanServiceProvider.findByBorrowingDate(LocalDate.parse(date, formatter));
         }
         else if(id != null) {
             try {

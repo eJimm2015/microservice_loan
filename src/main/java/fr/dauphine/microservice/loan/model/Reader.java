@@ -2,7 +2,7 @@ package fr.dauphine.microservice.loan.model;
 
 import org.springframework.hateoas.RepresentationModel;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Objects;
 
 
@@ -14,7 +14,7 @@ public class Reader extends RepresentationModel<Reader> {
 
     private String familyName;
     private String firstName;
-    private Date birthDate;
+    private LocalDate birthDate;
     private String address;
 
     public Integer getId() {
@@ -53,11 +53,11 @@ public class Reader extends RepresentationModel<Reader> {
         return this;
     }
 
-    public Date getBirthDate() {
+    public LocalDate getBirthDate() {
         return birthDate;
     }
 
-    public Reader setBirthDate(Date birthDate) {
+    public Reader setBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
         return this;
     }

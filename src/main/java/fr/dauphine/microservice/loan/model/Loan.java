@@ -1,7 +1,9 @@
 package fr.dauphine.microservice.loan.model;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
@@ -25,9 +27,11 @@ public class Loan  {
     @Column(nullable = false)
     private Integer readerId;
 
-    private Date borrowDate;
+    @ApiModelProperty(value = "YYYY-MM-DD", example = "YYYY-MM-DD")
+    private LocalDate borrowDate;
 
-    private Date returnDate;
+    @ApiModelProperty(value = "YYYY-MM-DD")
+    private LocalDate returnDate;
 
     public String getBookIsbn() {
         return bookIsbn;
@@ -47,20 +51,20 @@ public class Loan  {
         return this;
     }
 
-    public Date getBorrowDate() {
+    public LocalDate getBorrowDate() {
         return borrowDate;
     }
 
-    public Loan setBorrowDate(Date borrowDate) {
+    public Loan setBorrowDate(LocalDate borrowDate) {
         this.borrowDate = borrowDate;
         return this;
     }
 
-    public Date getReturnDate() {
+    public LocalDate getReturnDate() {
         return returnDate;
     }
 
-    public void setReturnDate(Date returnDate) {
+    public void setReturnDate(LocalDate returnDate) {
         this.returnDate = returnDate;
     }
 

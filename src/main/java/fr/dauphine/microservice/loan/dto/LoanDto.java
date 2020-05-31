@@ -5,8 +5,7 @@ import fr.dauphine.microservice.loan.model.Loan;
 import fr.dauphine.microservice.loan.model.Reader;
 import org.springframework.hateoas.RepresentationModel;
 
-import javax.persistence.OneToOne;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Objects;
 
 public class LoanDto extends RepresentationModel<LoanDto> {
@@ -26,9 +25,9 @@ public class LoanDto extends RepresentationModel<LoanDto> {
 
     private Reader reader;
 
-    private Date borrowDate;
+    private LocalDate borrowDate;
 
-    private Date returnDate;
+    private LocalDate returnDate;
 
     public Book getBook() {
         return book;
@@ -48,20 +47,20 @@ public class LoanDto extends RepresentationModel<LoanDto> {
         return this;
     }
 
-    public Date getBorrowDate() {
+    public LocalDate getBorrowDate() {
         return borrowDate;
     }
 
-    public LoanDto setBorrowDate(Date borrowDate) {
+    public LoanDto setBorrowDate(LocalDate borrowDate) {
         this.borrowDate = borrowDate;
         return this;
     }
 
-    public Date getReturnDate() {
+    public LocalDate getReturnDate() {
         return returnDate;
     }
 
-    public void setReturnDate(Date returnDate) {
+    public void setReturnDate(LocalDate returnDate) {
         this.returnDate = returnDate;
     }
 
